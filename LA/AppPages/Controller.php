@@ -218,9 +218,10 @@ class Controller {
    * @return string
    */
   function permalink( $permalink ) {
+
+    if ( $this->isAppPageQuery() ) {
     global $wp_query;
 
-    if ( $this->isAppPageQuery( $wp_query ) ) {
       $permalink = home_url( $wp_query->app_page->getUrl() );
     }
 
@@ -233,11 +234,12 @@ class Controller {
    * @return string[]
    */
   function bodyClass( $classes ) {
-    global $wp_query;
 
-    if ( $this->isAppPageQuery( $wp_query ) ) {
+    if ( $this->isAppPageQuery() ) {
+      global $post;
+
       $classes[] = LA_APP_PAGES_BODY_CLASS;
-      $classes[] = LA_APP_PAGES_BODY_CLASS . '-' . sanitize_html_class( $wp_query->post->post_name );
+      $classes[] = LA_APP_PAGES_BODY_CLASS . '-' . sanitize_html_class( $post->post_name );
     }
 
     return $classes;
@@ -245,17 +247,22 @@ class Controller {
 
 
   /**
-   * @param \WP_Query $wp_query
+   * @param \WP_Query $_wp_query
    * @return boolean
    */
-  function isAppPageQuery( \WP_Query $wp_query ) {
+  function isAppPageQuery( \WP_Query $_wp_query = null ) {
+
+    if ( $_wp_query === null ) {
+      global $wp_query;
+      $_wp_query = $wp_query;
+    }
 
     if (
-      $wp_query->is_page
-      && isset( $wp_query->app_page )
-      && $wp_query->app_page instanceof AppPage
+      $_wp_query->is_page
+      && isset( $_wp_query->app_page )
+      && $_wp_query->app_page instanceof AppPage
     ) {
-      $post = $wp_query->get_queried_object();
+      $post = $_wp_query->get_queried_object();
 
       if (
         isset( $post->is_app_page )
@@ -277,9 +284,10 @@ class Controller {
    * @return string
    */
   function filterEditLink( $link, $post_id, $text ) {
+
+    if ( $this->isAppPageQuery() ) {
     global $wp_query;
 
-    if ( $this->isAppPageQuery( $wp_query ) ) {
       $edit_url = $wp_query->app_page->getEditUrl();
       $link = preg_replace( '/href="[^"]*"/', sprintf( 'href="%s"', esc_attr( $edit_url ) ), $link );
     }
