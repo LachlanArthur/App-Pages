@@ -36,17 +36,24 @@ class Settings {
   }
 
 
+  function getCurrentAppPage() {
+    $name = $_GET[ LA_APP_PAGES_QUERY_VAR ] ?? '';
+
+    if ( $name ) {
+      return Controller::instance()->getAppPage( $name );
+    }
+
+    return null;
+  }
+
+
   function editAppPageSetup() {
-    global $post;
+    $app_page = $this->getCurrentAppPage();
 
-    $app_page_url = $_GET[ 'app-page' ] ?? '';
+    if ( $app_page ) {
+      global $post;
 
-    if ( $app_page_url ) {
-      $app_page = Controller::instance()->getAppPage( $app_page_url );
-
-      if ( $app_page ) {
-        $post = $app_page->asWpPost();
-      }
+      $post = $app_page->asWpPost();
     }
   }
 
@@ -105,14 +112,11 @@ class Settings {
         break;
 
       case 'edit':
-        $app_page_url = $_GET[ LA_APP_PAGES_QUERY_VAR ] ?? '';
+        $app_page = $this->getCurrentAppPage();
 
-        if ( $app_page_url ) {
-          $app_page = Controller::instance()->getAppPage( $app_page_url );
-          if ( $app_page ) {
-            $this->render_page_edit( $app_page );
-            break;
-          }
+        if ( $app_page ) {
+          $this->render_page_edit( $app_page );
+          break;
         }
 
         wp_redirect( add_query_arg( 'page', 'la-app-pages', admin_url( 'admin.php' ) ) );

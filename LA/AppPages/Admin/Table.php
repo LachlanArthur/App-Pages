@@ -30,6 +30,7 @@ class Table extends \WP_List_Table {
       //'cb'    => '<input type="checkbox" />',
       'title' => __( 'Title', 'la_app_pages' ),
       'url'   => __( 'URL', 'la_app_pages' ),
+      'name'  => __( 'Name', 'la_app_pages' ),
     ];
   }
 
@@ -92,8 +93,14 @@ class Table extends \WP_List_Table {
     return $title . $actions;
   }
 
+
   public function column_url( AppPage $app_page ) {
     return sprintf( '<a href="%s">%s</a>', esc_attr( $app_page->getPermalink() ), esc_html( $app_page->getUrl() ) );
+  }
+
+
+  public function column_name( AppPage $app_page ) {
+    return sprintf( '<code>%s</code>', esc_html( $app_page->getName() ) );
   }
 
 

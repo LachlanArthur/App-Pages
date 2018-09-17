@@ -82,9 +82,11 @@ class Controller {
   function addPage( AppPage $page ) {
     $this->pages->attach( $page );
 
-    $url_regex  = sprintf( '%s/?$', preg_quote( trim( $page->getUrl(), '/' ) ) );
+    $name = $page->getname();
+
+    $url_regex  = sprintf( '%s/?$', preg_quote( $name ) );
     $url_params = http_build_query( [
-      LA_APP_PAGES_QUERY_VAR => $page->getUrl(),
+      LA_APP_PAGES_QUERY_VAR => $name,
     ] );
 
     add_rewrite_rule( $url_regex, 'index.php?' . $url_params, 'top' );
@@ -114,14 +116,14 @@ class Controller {
 
 
   /**
-   * @param string $url
+   * @param string $name
    * @return AppPage
    */
-  function getAppPage( $url ) {
+  function getAppPage( $name ) {
     $this->pages->rewind();
     while ( $this->pages->valid() ) {
 
-      if ( $this->pages->current()->getUrl() === $url ) {
+      if ( $this->pages->current()->getName() === $name ) {
         return $this->pages->current();
       }
 
@@ -138,12 +140,12 @@ class Controller {
    */
   private function checkRequest( \WP $wp ) {
 
-    $app_page_url = $wp->query_vars['app-page'] ?? '';
-    if ( !$app_page_url ) {
+    $name = $wp->query_vars['app-page'] ?? '';
+    if ( ! $name ) {
       return;
     }
 
-    $app_page = $this->getAppPage( $app_page_url );
+    $app_page = $this->getAppPage( $name );
 
     if ( $app_page ) {
       $this->matched = $app_page;
@@ -220,7 +222,7 @@ class Controller {
   function permalink( $permalink ) {
 
     if ( $this->isAppPageQuery() ) {
-    global $wp_query;
+      global $wp_query;
 
       $permalink = home_url( $wp_query->app_page->getUrl() );
     }
@@ -286,7 +288,7 @@ class Controller {
   function filterEditLink( $link, $post_id, $text ) {
 
     if ( $this->isAppPageQuery() ) {
-    global $wp_query;
+      global $wp_query;
 
       $edit_url = $wp_query->app_page->getEditUrl();
       $link = preg_replace( '/href="[^"]*"/', sprintf( 'href="%s"', esc_attr( $edit_url ) ), $link );

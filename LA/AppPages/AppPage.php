@@ -9,6 +9,12 @@ class AppPage {
   /**
    * @var string
    */
+  private $name;
+
+
+  /**
+   * @var string
+   */
   private $url;
 
 
@@ -30,10 +36,19 @@ class AppPage {
   private $wp_post;
 
 
-  function __construct( $url, $title = 'Untitled', $template = 'page.php' ) {
+  function __construct( $name, $url, $title = 'Untitled', $template = 'page.php' ) {
+    $this->name = $name;
     $this->url = $url;
     $this->setTitle( $title );
     $this->setTemplate( $template );
+  }
+
+
+  /**
+   * @return string
+   */
+  function getName() {
+    return $this->name;
   }
 
 
@@ -60,7 +75,7 @@ class AppPage {
     return add_query_arg( [
       'page'                 => 'la-app-pages',
       'action'               => 'edit',
-      LA_APP_PAGES_QUERY_VAR => $this->getUrl(),
+      LA_APP_PAGES_QUERY_VAR => $this->getName(),
     ], admin_url( 'admin.php' ) );
   }
 

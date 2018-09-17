@@ -49,6 +49,6 @@ function autoload_namespace_dir( $namespace, $dir, $strip_namespace = false ) {
 
 // Test page
 add_action( 'init', function() {
-  $test = new AppPage( '/test/', 'Test App Page' );
+  $test = new AppPage( 'test', '/test/', 'Test App Page' );
   $test->register();
 } );
