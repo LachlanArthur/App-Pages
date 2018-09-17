@@ -131,7 +131,7 @@ class AppPage {
 
     if ( is_null( $this->wp_post ) ) {
       $post = [
-        'ID'             => 0,
+        'ID'             => -1,
         'post_title'     => $this->title,
         'post_name'      => sanitize_title( $this->title ),
         'post_content'   => '',
@@ -146,7 +146,7 @@ class AppPage {
         'post_password'  => '',
         'to_ping'        => '',
         'pinged'         => '',
-        'guid'           => home_url( $this->getUrl() ),
+        'guid'           => $this->getPermalink(),
         'post_date'      => current_time( 'mysql' ),
         'post_date_gmt'  => current_time( 'mysql', 1 ),
         'post_author'    => 0,

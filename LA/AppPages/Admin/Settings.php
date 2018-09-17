@@ -21,6 +21,12 @@ class Settings {
   private $table;
 
 
+  /**
+   * @var NavMenus
+   */
+  private $navMenus;
+
+
   public function __construct() {
     add_action( 'admin_init', [ $this, 'init' ] );
     add_action( 'admin_menu', [ $this, 'add_pages' ] );
@@ -31,8 +37,9 @@ class Settings {
 
 
   function init() {
-    $this->options = self::get_options();
-    $this->table   = new Table();
+    $this->options  = self::get_options();
+    $this->table    = new Table();
+    $this->navMenus = new NavMenus();
   }
 
 
