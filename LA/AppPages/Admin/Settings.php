@@ -27,22 +27,30 @@ class Settings {
   private $navMenus;
 
 
+  /**
+   * @var Editor
+   */
+  private $editor;
+
+
   public function __construct() {
     add_action( 'admin_init', [ $this, 'init' ] );
     add_action( 'admin_menu', [ $this, 'add_pages' ] );
     add_action( 'admin_init', [ $this, 'options_page_1_init' ] );
-
-    add_action( 'admin_action_edit', [ $this, 'editAppPageSetup' ] );
   }
 
 
   function init() {
     $this->options  = self::get_options();
-    $this->table    = new Table();
-    $this->navMenus = new NavMenus();
+    $this->table    = new Table( $this );
+    $this->navMenus = new NavMenus( $this );
+    $this->editor   = new Editor( $this );
   }
 
 
+  /**
+   * @return \LA\AppPages\AppPage
+   */
   function getCurrentAppPage() {
     $name = $_GET[ LA_APP_PAGES_QUERY_VAR ] ?? '';
 
@@ -51,17 +59,6 @@ class Settings {
     }
 
     return null;
-  }
-
-
-  function editAppPageSetup() {
-    $app_page = $this->getCurrentAppPage();
-
-    if ( $app_page ) {
-      global $post;
-
-      $post = $app_page->asWpPost();
-    }
   }
 
 
@@ -77,6 +74,7 @@ class Settings {
       51 // Position (below comments)
     );
 
+    /*
     // Duplicate top-level item to change the menu title
     add_submenu_page(
       'la-app-pages', // Parent slug
@@ -95,6 +93,7 @@ class Settings {
       'la-app-pages-options', // Page ID (used in URL)
       [ $this, 'render_page_options' ] // Render callback
     );
+    */
 
   }
 
@@ -119,14 +118,7 @@ class Settings {
         break;
 
       case 'edit':
-        $app_page = $this->getCurrentAppPage();
-
-        if ( $app_page ) {
-          $this->render_page_edit( $app_page );
-          break;
-        }
-
-        wp_redirect( add_query_arg( 'page', 'la-app-pages', admin_url( 'admin.php' ) ) );
+        $this->editor->render();
         break;
 
     }
@@ -144,38 +136,6 @@ class Settings {
         //$this->table->search_box( 'Search App Pages', 'app-page-search' );
         $this->table->display();
         ?>
-      </form>
-    </div>
-    <?php
-  }
-
-
-  public function render_page_edit( AppPage $app_page ) {
-    global $post, $is_IE;
-
-    $post      = $app_page->asWpPost();
-    $permalink = $app_page->getPermalink();
-
-    ?>
-    <div class="wrap">
-      <h1 class="wp-heading-inline"><?php echo esc_html( $app_page->getTitle() ) ?></h1>
-      <div id="edit-slug-box">
-        <strong><?= __( 'Permalink:' ) ?></strong>
-        <span id="sample-permalink"><a href="<?= esc_attr( $permalink ) ?>"><?= esc_html( $permalink ) ?></a></span>
-      </div>
-      <form method="post">
-        <?php wp_editor( $post->post_content, 'content', [
-          '_content_editor_dfw' => true,
-          'drag_drop_upload'    => true,
-          'tabfocus_elements'   => 'content-html,save-post',
-          'editor_height'       => 300,
-          'tinymce'             => [
-            'resize'                  => false,
-            'wp_autoresize_on'        => ( get_user_setting( 'editor_expand', 'on' ) === 'on' ),
-            'add_unload_trigger'      => false,
-            'wp_keep_scroll_position' => ! $is_IE,
-          ],
-        ] ); ?>
       </form>
     </div>
     <?php

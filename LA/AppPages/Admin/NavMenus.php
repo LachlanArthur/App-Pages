@@ -9,7 +9,16 @@ use LA\AppPages\Controller;
 class NavMenus {
 
 
-  function __construct() {
+  /**
+   * @var Settings
+   */
+  private $settings;
+
+
+  function __construct( Settings $settings ) {
+
+    $this->settings = $settings;
+
     $this->init();
 
     add_filter( 'wp_setup_nav_menu_item',  [ $this, 'navMenuItemSetup' ], 10, 1 );

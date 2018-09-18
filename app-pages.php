@@ -13,9 +13,11 @@ namespace LA\AppPages;
 
 
 define( 'LA_APP_PAGES_DIR', trailingslashit( __DIR__ ) );
+define( 'LA_APP_PAGES_URL', plugin_dir_url( __FILE__ ) );
 
 if ( ! defined( 'LA_APP_PAGES_QUERY_VAR' ) ) define( 'LA_APP_PAGES_QUERY_VAR', 'app-page' );
 if ( ! defined( 'LA_APP_PAGES_BODY_CLASS' ) ) define( 'LA_APP_PAGES_BODY_CLASS', 'app-page' );
+if ( ! defined( 'LA_APP_PAGES_SLOT_SHORTCODE' ) ) define( 'LA_APP_PAGES_SLOT_SHORTCODE', 'app-page-slot' );
 
 
 autoload_namespace_dir( 'LA', __DIR__ );
@@ -50,5 +52,22 @@ function autoload_namespace_dir( $namespace, $dir, $strip_namespace = false ) {
 // Test page
 add_action( 'init', function() {
   $test = new AppPage( 'test', '/test/', 'Test App Page' );
-  $test->register();
+  $test
+    ->addSlot( 'alert', [
+      'render' => function() {
+        return 'ALERT SLOT';
+      },
+      'preview' => function() {
+        return 'ALERT SLOT PREVIEW';
+      }
+    ] )
+    ->addSlot( 'list', [
+      'render' => function() {
+        return 'LIST SLOT';
+      },
+      'preview' => function() {
+        return 'LIST SLOT PREVIEW';
+      }
+    ] )
+    ->register();
 } );

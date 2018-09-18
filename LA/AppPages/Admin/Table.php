@@ -15,7 +15,15 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 class Table extends \WP_List_Table {
 
 
-  function __construct( $args = [] ) {
+  /**
+   * @var Settings
+   */
+  private $settings;
+
+
+  function __construct( Settings $settings ) {
+
+    $this->settings = $settings;
 
     parent::__construct( [
       'plural'   => __( 'App Pages', 'la_app_pages' ),

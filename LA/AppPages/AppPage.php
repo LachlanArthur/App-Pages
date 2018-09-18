@@ -36,11 +36,19 @@ class AppPage {
   private $wp_post;
 
 
+  /**
+   * @var AppPageSlot[]
+   */
+  private $slots = [];
+
+
   function __construct( $name, $url, $title = 'Untitled', $template = 'page.php' ) {
     $this->name = $name;
     $this->url = $url;
     $this->setTitle( $title );
     $this->setTemplate( $template );
+
+    add_shortcode( LA_APP_PAGES_SLOT_SHORTCODE, [ $this, 'renderSlot' ] );
   }
 
 
@@ -117,6 +125,69 @@ class AppPage {
 
 
   /**
+   * @param string $name
+   * @param array $args
+   * @return self
+   */
+  function addSlot( $name, $args ) {
+    $this->slots[ $name ] = new AppPageSlot( $name, $args );
+    return $this;
+  }
+
+
+  /**
+   * @param string $name
+   * @return AppPageSlot
+   */
+  function getSlot( $name ) {
+    return $this->slots[ $name ] ?? null;
+  }
+
+
+  /**
+   * @return string[]
+   */
+  function getSlotNames() {
+    return array_keys( $this->slots );
+  }
+
+
+  /**
+   * @param array $shortcode_atts
+   * @return string
+   */
+  function renderSlot( $shortcode_atts ) {
+    $slot = $this->getSlotFromShortcode( $shortcode_atts );
+    if ( $slot ) return $slot->render();
+    return '';
+  }
+
+
+  /**
+   * @param array $shortcode_atts
+   * @return string
+   */
+  function renderSlotPreview( $shortcode_atts ) {
+    $slot = $this->getSlotFromShortcode( $shortcode_atts );
+    if ( $slot ) return $slot->preview();
+    return '';
+  }
+
+
+  /**
+   * @param array $shortcode_atts
+   * @return AppPageSlot
+   */
+  function getSlotFromShortcode( $shortcode_atts ) {
+    $shortcode_atts = shortcode_atts( [
+      'slot' => '',
+    ], $shortcode_atts, LA_APP_PAGES_SLOT_SHORTCODE );
+
+    return $this->getSlot( $shortcode_atts[ 'slot' ] ?? '' );
+  }
+
+
+  /**
    * @return void
    */
   function register() {
@@ -134,7 +205,23 @@ class AppPage {
         'ID'             => -1,
         'post_title'     => $this->title,
         'post_name'      => sanitize_title( $this->title ),
-        'post_content'   => '',
+        'post_content'   => 'a
+
+[app-page-slot slot="alert"]
+
+b
+
+[app-page-slot slot="list"]
+
+c
+
+[app-page-slot]
+
+d
+
+[app-page-slot slot="foo"]
+
+e',
         'post_excerpt'   => '',
         'post_parent'    => 0,
         'menu_order'     => 0,
