@@ -13,6 +13,12 @@ class AppPageSlot {
 
 
   /**
+   * @var string
+   */
+  public $title;
+
+
+  /**
    * @var callable
    */
   private $renderFunc;
@@ -26,26 +32,39 @@ class AppPageSlot {
 
   function __construct( $name, $args ) {
 
-    $this->name = $name;
-
     $args = wp_parse_args( $args, [
+      'title'   => $name,
       'render'  => '__return_empty_string',
       'preview' => false,
     ] );
 
+    $this->name        = $name;
+    $this->title       = $args[ 'title' ];
     $this->renderFunc  = $args[ 'render' ];
     $this->previewFunc = $args[ 'preview' ] ?: $args[ 'render' ];
 
   }
 
 
-  function render() {
-    return ($this->renderFunc)();
+  function render( $echo = true ) {
+    return $this->output( $this->renderFunc, $echo );
   }
 
 
-  function preview() {
-    return ($this->previewFunc)();
+  function preview( $echo = true ) {
+    return $this->output( $this->previewFunc, $echo );
+  }
+
+
+  /**
+   * @param callable $func
+   * @param bool $echo
+   * @return string|void
+   */
+  private function output( callable $func, $echo ) {
+    if ( ! $echo ) ob_start();
+    $func();
+    if ( ! $echo ) return ob_get_clean();
   }
 
 

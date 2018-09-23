@@ -1,0 +1,24 @@
+{
+  "name": "app-pages",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/LachlanArthur/App-Pages.git"
+  },
+  "author": "LachlanArthur",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LachlanArthur/App-Pages/issues"
+  },
+  "homepage": "https://github.com/LachlanArthur/App-Pages#readme",
+  "devDependencies": {
+    "@types/backbone": "^1.3.43",
+    "@types/tinymce": "^4.5.16",
+    "typescript": "^3.0.3"
+  }
+}

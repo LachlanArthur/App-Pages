@@ -54,20 +54,26 @@ add_action( 'init', function() {
   $test = new AppPage( 'test', '/test/', 'Test App Page' );
   $test
     ->addSlot( 'alert', [
-      'render' => function() {
-        return 'ALERT SLOT';
-      },
-      'preview' => function() {
-        return 'ALERT SLOT PREVIEW';
-      }
+      'title'   => 'Alerts',
+      'render'  => __NAMESPACE__ . '\\slot_alert_render',
+      'preview' => __NAMESPACE__ . '\\slot_alert_preview',
     ] )
     ->addSlot( 'list', [
+      'title' => 'Member List',
       'render' => function() {
-        return 'LIST SLOT';
+        echo 'LIST SLOT';
       },
       'preview' => function() {
-        return 'LIST SLOT PREVIEW';
+        echo 'LIST SLOT PREVIEW';
       }
     ] )
     ->register();
 } );
+
+function slot_alert_render() {
+  echo 'ALERT SLOT';
+}
+
+function slot_alert_preview() {
+  echo 'ALERT SLOT PREVIEW';
+}

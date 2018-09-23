@@ -48,6 +48,11 @@ class AppPage {
     $this->setTitle( $title );
     $this->setTemplate( $template );
 
+    $this->init();
+  }
+
+
+  function init() {
     add_shortcode( LA_APP_PAGES_SLOT_SHORTCODE, [ $this, 'renderSlot' ] );
   }
 
@@ -147,8 +152,8 @@ class AppPage {
   /**
    * @return string[]
    */
-  function getSlotNames() {
-    return array_keys( $this->slots );
+  function getSlotTitles() {
+    return wp_list_pluck( $this->slots, 'title' );
   }
 
 
@@ -158,7 +163,7 @@ class AppPage {
    */
   function renderSlot( $shortcode_atts ) {
     $slot = $this->getSlotFromShortcode( $shortcode_atts );
-    if ( $slot ) return $slot->render();
+    if ( $slot ) return $slot->render( false );
     return '';
   }
 
@@ -169,8 +174,8 @@ class AppPage {
    */
   function renderSlotPreview( $shortcode_atts ) {
     $slot = $this->getSlotFromShortcode( $shortcode_atts );
-    if ( $slot ) return $slot->preview();
-    return '';
+    if ( $slot ) return $slot->preview( false );
+    throw new \UnexpectedValueException( 'Invalid slot' );
   }
 
 

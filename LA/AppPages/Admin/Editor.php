@@ -21,7 +21,7 @@ class Editor {
 
     add_action( 'admin_action_edit', [ $this, 'editAppPageSetup' ] );
 
-    add_action( 'wp_ajax_la_app_pages_slot_preview', [ $this, 'renderSlotPreview' ] );
+    add_action( 'wp_ajax_la_app_pages_slot_preview', [ $this, 'ajaxRenderSlotPreview' ] );
 
     add_action( 'admin_init', [ $this, 'adminInit' ] );
     add_action( 'admin_head', [ $this, 'adminHead' ] );
@@ -38,6 +38,8 @@ class Editor {
     if ( !current_user_can( 'edit_posts' ) && !current_user_can( 'edit_pages' ) ) return;
 
     if ( 'true' != get_user_option( 'rich_editing' ) ) return;
+
+    if ( ! $this->settings->getCurrentAppPage() ) return;
 
     add_filter( 'mce_external_plugins', [ $this ,'registerMcePlugin' ] );
     add_filter( 'mce_buttons_2',        [ $this, 'registerMceButton' ] );
@@ -68,21 +70,26 @@ class Editor {
 
 
   function adminScripts() {
+    $app_page = $this->settings->getCurrentAppPage();
+
+    if ( ! $app_page ) return;
+
     wp_enqueue_style( 'app-pages-slot-mce', LA_APP_PAGES_URL . 'assets/css/mce-plugin.css' );
 
     wp_enqueue_script( 'app-pages-slot-mce-view', LA_APP_PAGES_URL . 'assets/js/mce-view.js', [ 'shortcode', 'wp-util', 'jquery', 'mce-view' ], false, true );
 
-    $app_page = $this->settings->getCurrentAppPage();
+    $slotOptions = [];
+    foreach ( $app_page->getSlotTitles() as $slotName => $slotTitle ) {
+      $slotOptions[] = [
+        'text' => $slotName,
+        'value' => $slotTitle,
+      ];
+    }
 
     $jsConfig = [
       'appPage'       => $app_page->getName(),
       'slotShortcode' => LA_APP_PAGES_SLOT_SHORTCODE,
-      'slots'         => array_map( function( $name ) {
-        return [
-          'text' => $name,
-          'value' => $name,
-        ];
-      }, $app_page->getSlotNames() ),
+      'slots'         => $slotOptions,
     ];
     wp_localize_script( 'app-pages-slot-mce-view', 'AppPagesConfig', $jsConfig );
   }
@@ -126,13 +133,13 @@ class Editor {
   }
 
 
-  function renderSlotPreview() {
+  function ajaxRenderSlotPreview() {
     global $wp_styles;
     wp_styles();
 
     $app_page = Controller::instance()->getAppPage( $_REQUEST[ 'app_page' ] ?? '' );
 
-    if ( empty( $app_page ) ) wp_send_json_error();
+    if ( empty( $app_page ) ) wp_send_json_error( [ 'message' => 'Invalid page' ] );
 
     // Load frontend styles in preview
     ob_start();
@@ -142,9 +149,15 @@ class Editor {
     $wp_styles->do_footer_items();
     $styles = ob_get_clean();
 
-    wp_send_json( [
+    try {
+      $preview = $app_page->renderSlotPreview( $_REQUEST );
+    } catch ( \Exception $e ) {
+      wp_send_json_error( [ 'message' => $e->getMessage() ] );
+    }
+
+    wp_send_json_success( [
       'head' => $styles,
-      'body' => $app_page->renderSlotPreview( $_REQUEST ),
+      'body' => $preview,
     ] );
   }
 
